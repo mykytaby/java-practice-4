@@ -1,12 +1,18 @@
 package org.example;
 
 import java.util.Scanner;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 public class Main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        // Встановлюємо UTF-8 для виводу в консоль
+        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+        
+        // Встановлюємо UTF-8 для сканера (вводу)
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 
-        // Запитуємо кількість елементів у користувача
+        // Далі твій код без змін...
         System.out.print("Введіть кількість одиниць одягу: ");
         int n = scanner.nextInt();
         scanner.nextLine(); // Очищення буфера після nextInt()
