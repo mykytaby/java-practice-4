@@ -49,3 +49,6 @@ public class Main {
         scanner.close();
     }
 }
+
+Введіть кількість одиниць одягу: 2
+
