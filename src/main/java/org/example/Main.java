@@ -1,26 +1,31 @@
 package org.example;
 
-import java.io.PrintStream;
+import java.io.File;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
+    private static final String FILE_NAME = "input.txt";
+
     public static void main(String[] args) {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 
-        // Внутрішня колекція, порожня на початку роботи
         ArrayList<Clothes> wardrobe = new ArrayList<>();
 
-        System.out.println("=== Практична робота №8. Розширена ієрархія ===");
+        System.out.println("=== Практична робота №9. Робота з файлами ===");
+        
+        // Зчитуємо дані з файлу при запуску
+        loadFromFile(FILE_NAME, wardrobe);
 
         while (true) {
             System.out.println("\n--- ГОЛОВНЕ МЕНЮ ---");
             System.out.println("1. Створити новий об'єкт");
             System.out.println("2. Вивести інформацію про всі об'єкти");
-            System.out.println("3. Завершити роботу програми");
+            System.out.println("3. Завершити роботу програми (і зберегти дані)");
             System.out.print("Оберіть дію: ");
 
             String mainChoice = scanner.nextLine();
@@ -40,6 +45,8 @@ public class Main {
                     }
                     break;
                 case "3":
+                    // Зберігаємо дані перед виходом
+                    saveToFile(FILE_NAME, wardrobe);
                     System.out.println("Програму успішно завершено!");
                     scanner.close();
                     return;
@@ -49,7 +56,6 @@ public class Main {
         }
     }
 
-    // Метод для обробки підменю створення об'єктів
     private static void handleCreationMenu(Scanner scanner, ArrayList<Clothes> wardrobe) {
         System.out.println("\n--- МЕНЮ СТВОРЕННЯ ---");
         System.out.println("1. Штани (Pants)");
@@ -62,17 +68,15 @@ public class Main {
 
         String createChoice = scanner.nextLine();
         
-        if (createChoice.equals("6")) {
-            return; // Повернення до головного меню
-        }
+        if (createChoice.equals("6")) return;
 
         if (!createChoice.matches("[1-5]")) {
-            System.out.println("Некоректний вибір. Повернення до головного меню.");
+            System.out.println("Некоректний вибір.");
             return;
         }
 
         try {
-            System.out.print("Введіть тип (наприклад Джинси, Пальто): ");
+            System.out.print("Введіть тип: ");
             String type = scanner.nextLine();
             System.out.print("Введіть бренд: ");
             String brand = scanner.nextLine();
@@ -80,44 +84,108 @@ public class Main {
             Size size = Size.valueOf(scanner.nextLine().toUpperCase().trim());
             System.out.print("Введіть ціну: ");
             double price = scanner.nextDouble();
-            scanner.nextLine(); // очищення буфера
+            scanner.nextLine();
 
             switch (createChoice) {
                 case "1":
-                    System.out.print("Чи є ремінь в комплекті? (true/false): ");
-                    boolean hasBelt = scanner.nextBoolean();
-                    wardrobe.add(new Pants(type, brand, size, price, hasBelt));
-                    System.out.println("Штани успішно додано!");
+                    System.out.print("Чи є ремінь? (true/false): ");
+                    wardrobe.add(new Pants(type, brand, size, price, scanner.nextBoolean()));
+                    System.out.println("Штани додано!");
                     break;
                 case "2":
                     System.out.print("Короткі рукави? (true/false): ");
-                    boolean shortSleeves = scanner.nextBoolean();
-                    wardrobe.add(new Shirts(type, brand, size, price, shortSleeves));
-                    System.out.println("Сорочку успішно додано!");
+                    wardrobe.add(new Shirts(type, brand, size, price, scanner.nextBoolean()));
+                    System.out.println("Сорочку додано!");
                     break;
                 case "3":
-                    System.out.print("Одяг водонепроникний? (true/false): ");
-                    boolean isWaterproof = scanner.nextBoolean();
-                    wardrobe.add(new Outerwear(type, brand, size, price, isWaterproof));
-                    System.out.println("Верхній одяг успішно додано!");
+                    System.out.print("Водонепроникний? (true/false): ");
+                    wardrobe.add(new Outerwear(type, brand, size, price, scanner.nextBoolean()));
+                    System.out.println("Верхній одяг додано!");
                     break;
                 case "4":
-                    System.out.print("Це вечірня сукня? (true/false): ");
-                    boolean isEvening = scanner.nextBoolean();
-                    wardrobe.add(new Dress(type, brand, size, price, isEvening));
-                    System.out.println("Сукню успішно додано!");
+                    System.out.print("Вечірня сукня? (true/false): ");
+                    wardrobe.add(new Dress(type, brand, size, price, scanner.nextBoolean()));
+                    System.out.println("Сукню додано!");
                     break;
                 case "5":
                     wardrobe.add(new Clothes(type, brand, size, price));
-                    System.out.println("Базовий одяг успішно додано!");
+                    System.out.println("Базовий одяг додано!");
                     break;
             }
-            if (scanner.hasNextLine()) scanner.nextLine(); // фінальне очищення
+            if (scanner.hasNextLine()) scanner.nextLine();
         } catch (IllegalArgumentException e) {
             System.out.println("Помилка валідації: " + e.getMessage());
         } catch (InputMismatchException e) {
-            System.out.println("Помилка вводу: Некоректний формат числа або логічного значення!");
+            System.out.println("Помилка вводу!");
             scanner.nextLine();
+        }
+    }
+
+    /**
+     * Метод для зчитування даних з файлу у колекцію.
+     */
+    private static void loadFromFile(String filename, ArrayList<Clothes> wardrobe) {
+        File file = new File(filename);
+        if (!file.exists()) {
+            System.out.println("Файл " + filename + " не знайдено. Буде створено новий при збереженні.");
+            return;
+        }
+
+        try (Scanner fileScanner = new Scanner(file, StandardCharsets.UTF_8.name())) {
+            int lineCount = 0;
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine();
+                if (line.trim().isEmpty()) continue;
+
+                String[] parts = line.split(";");
+                try {
+                    String className = parts[0];
+                    String type = parts[1];
+                    String brand = parts[2];
+                    Size size = Size.valueOf(parts[3]);
+                    double price = Double.parseDouble(parts[4]);
+
+                    switch (className) {
+                        case "Clothes":
+                            wardrobe.add(new Clothes(type, brand, size, price));
+                            break;
+                        case "Pants":
+                            wardrobe.add(new Pants(type, brand, size, price, Boolean.parseBoolean(parts[5])));
+                            break;
+                        case "Shirts":
+                            wardrobe.add(new Shirts(type, brand, size, price, Boolean.parseBoolean(parts[5])));
+                            break;
+                        case "Outerwear":
+                            wardrobe.add(new Outerwear(type, brand, size, price, Boolean.parseBoolean(parts[5])));
+                            break;
+                        case "Dress":
+                            wardrobe.add(new Dress(type, brand, size, price, Boolean.parseBoolean(parts[5])));
+                            break;
+                        default:
+                            System.out.println("Невідомий клас у файлі: " + className);
+                    }
+                    lineCount++;
+                } catch (Exception e) {
+                    System.out.println("Помилка парсингу рядка: " + line);
+                }
+            }
+            System.out.println("Успішно завантажено об'єктів: " + lineCount);
+        } catch (Exception e) {
+            System.out.println("Помилка читання файлу: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Метод для запису колекції у файл.
+     */
+    private static void saveToFile(String filename, ArrayList<Clothes> wardrobe) {
+        try (PrintWriter writer = new PrintWriter(new File(filename), StandardCharsets.UTF_8.name())) {
+            for (int i = 0; i < wardrobe.size(); i++) {
+                writer.println(wardrobe.get(i).toDataString());
+            }
+            System.out.println("\n[!] Всі дані успішно збережено у файл: " + filename);
+        } catch (Exception e) {
+            System.out.println("\n[!] Помилка збереження у файл: " + e.getMessage());
         }
     }
 }
