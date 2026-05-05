@@ -2,6 +2,7 @@ package org.example;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -10,31 +11,17 @@ public class Main {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 
-        System.out.println("=== Практична робота №6. Драйвер програми ===");
-        System.out.print("Введіть розмір шафи: ");
-        int capacity = 0;
-        try {
-            capacity = scanner.nextInt();
-        } catch (Exception e) {
-            System.out.println("Помилка вводу. Завершення.");
-            return;
-        }
-        scanner.nextLine(); 
+        // Використовуємо ArrayList замість масиву та класу Wardrobe
+        ArrayList<Clothes> wardrobe = new ArrayList<>();
 
-        Wardrobe wardrobe;
-        try {
-            wardrobe = new Wardrobe(capacity);
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
+        System.out.println("=== Практична робота №7. Колекції та Поліморфізм ===");
 
         while (true) {
             System.out.println("\n--- МЕНЮ ---");
-            System.out.println("1. Додати новий одяг");
-            System.out.println("2. Скопіювати останній одяг (Тест конструктора копіювання)");
-            System.out.println("3. Вивести всі речі з шафи");
-            System.out.println("4. Показати загальну статистику (Тест статичного поля)");
+            System.out.println("1. Додати Штани (Pants)");
+            System.out.println("2. Додати Сорочку/Футболку (Shirts)");
+            System.out.println("3. Додати інший загальний одяг (Clothes)");
+            System.out.println("4. Вивести весь гардероб (Демонстрація поліморфізму)");
             System.out.println("5. Вийти");
             System.out.print("Оберіть дію: ");
 
@@ -42,55 +29,63 @@ public class Main {
 
             switch (choice) {
                 case "1":
+                case "2":
+                case "3":
                     try {
-                        System.out.print("Введіть тип: ");
+                        System.out.print("Введіть тип (наприклад Джинси, Поло, Куртка): ");
                         String type = scanner.nextLine();
                         System.out.print("Введіть бренд: ");
                         String brand = scanner.nextLine();
-                        
                         System.out.print("Введіть розмір (XS, S, M, L, XL, XXL): ");
                         Size size = Size.valueOf(scanner.nextLine().toUpperCase().trim());
-                        
                         System.out.print("Введіть ціну: ");
                         double price = scanner.nextDouble();
-                        scanner.nextLine(); 
+                        scanner.nextLine(); // очищення буфера
 
-                        Clothes clothes = new Clothes(type, brand, size, price);
-                        wardrobe.addClothes(clothes);
-                        System.out.println("Одяг успішно додано!");
-                    } catch (IllegalArgumentException | IllegalStateException e) {
-                        System.out.println("Помилка: " + e.getMessage());
+                        if (choice.equals("1")) {
+                            System.out.print("Чи є ремінь в комплекті? (true/false): ");
+                            boolean hasBelt = scanner.nextBoolean();
+                            scanner.nextLine();
+                            wardrobe.add(new Pants(type, brand, size, price, hasBelt));
+                            System.out.println("Штани додано!");
+                        } else if (choice.equals("2")) {
+                            System.out.print("Це сорочка з коротким рукавом? (true/false): ");
+                            boolean shortSleeves = scanner.nextBoolean();
+                            scanner.nextLine();
+                            wardrobe.add(new Shirts(type, brand, size, price, shortSleeves));
+                            System.out.println("Сорочку додано!");
+                        } else {
+                            wardrobe.add(new Clothes(type, brand, size, price));
+                            System.out.println("Одяг додано!");
+                        }
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Помилка валідації: " + e.getMessage());
                     } catch (InputMismatchException e) {
-                        System.out.println("Помилка: Некоректний формат числа!");
+                        System.out.println("Помилка: Некоректний формат числа або логічного значення!");
                         scanner.nextLine();
                     }
                     break;
-                case "2":
-                    Clothes last = wardrobe.getLastItem();
-                    if (last == null) {
-                        System.out.println("Спочатку додайте хоча б одну річ!");
+
+                case "4":
+                    System.out.println("\nВаш гардероб (Розмір колекції: " + wardrobe.size() + "):");
+                    if (wardrobe.isEmpty()) {
+                        System.out.println("Шафа порожня.");
                     } else {
-                        try {
-                            Clothes copy = new Clothes(last);
-                            wardrobe.addClothes(copy);
-                            System.out.println("Успішно створено та додано копію: " + copy.getType());
-                        } catch (IllegalStateException e) {
-                            System.out.println(e.getMessage());
+                        // Демонстрація поліморфізму: 
+                        // об'єкти Pants та Shirts викликають свої перевизначені методи toString(),
+                        // хоча зберігаються у списку типу Clothes.
+                        for (int i = 0; i < wardrobe.size(); i++) {
+                            Clothes item = wardrobe.get(i);
+                            System.out.println((i + 1) + ". " + item.toString());
                         }
                     }
                     break;
-                case "3":
-                    System.out.println("\nВаш гардероб:");
-                    wardrobe.displayWardrobe();
-                    break;
-                case "4":
-                    System.out.println("\nСтатистика системи:");
-                    System.out.println("Всього створено об'єктів Clothes за час роботи: " + Clothes.getTotalClothesCreated());
-                    break;
+
                 case "5":
                     System.out.println("Завершення роботи.");
                     scanner.close();
                     return;
+
                 default:
                     System.out.println("Невідома команда.");
             }
