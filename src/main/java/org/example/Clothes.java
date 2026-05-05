@@ -3,32 +3,21 @@ package org.example;
 import java.util.Objects;
 
 /**
- * Клас, що описує предмет одягу.
+ * Базовий клас, що описує предмет одягу.
  */
 public class Clothes {
-    // Статичне поле для підрахунку створених об'єктів
-    private static int totalClothesCreated = 0;
-
     private String type;
     private String brand;
-    private Size size; // Використовуємо enum замість String
+    private Size size; 
     private double price;
 
-    /**
-     * Основний конструктор з параметрами.
-     */
     public Clothes(String type, String brand, Size size, double price) {
         setType(type);
         setBrand(brand);
         setSize(size);
         setPrice(price);
-        totalClothesCreated++; // Збільшуємо лічильник при створенні
     }
 
-    /**
-     * Конструктор копіювання.
-     * @param other об'єкт для копіювання
-     */
     public Clothes(Clothes other) {
         if (other == null) {
             throw new IllegalArgumentException("Об'єкт для копіювання не може бути null.");
@@ -37,17 +26,8 @@ public class Clothes {
         this.brand = other.brand;
         this.size = other.size;
         this.price = other.price;
-        totalClothesCreated++; // Збільшуємо лічильник при копіюванні
     }
 
-    /**
-     * Статичний метод для отримання загальної кількості створених об'єктів.
-     */
-    public static int getTotalClothesCreated() {
-        return totalClothesCreated;
-    }
-
-    // Гетери та сетери
     public String getType() { return type; }
     public void setType(String type) {
         if (type == null || type.trim().isEmpty()) {
