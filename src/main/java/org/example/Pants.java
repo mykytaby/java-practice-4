@@ -24,4 +24,9 @@ public class Pants extends Clothes {
                 ", hasBelt=" + hasBelt +
                 '}';
     }
+
+    @Override
+    public String toDataString() {
+        return "Pants;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + hasBelt;
+    }
 }

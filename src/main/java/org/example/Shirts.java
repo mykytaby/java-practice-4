@@ -24,4 +24,9 @@ public class Shirts extends Clothes {
                 ", shortSleeves=" + shortSleeves +
                 '}';
     }
+
+    @Override
+    public String toDataString() {
+        return "Shirts;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + shortSleeves;
+    }
 }

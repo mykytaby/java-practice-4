@@ -24,4 +24,9 @@ public class Dress extends Clothes {
                 ", isEvening=" + isEvening +
                 '}';
     }
+
+    @Override
+    public String toDataString() {
+        return "Dress;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + isEvening;
+    }
 }

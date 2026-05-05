@@ -24,4 +24,9 @@ public class Outerwear extends Clothes {
                 ", isWaterproof=" + isWaterproof +
                 '}';
     }
+
+    @Override
+    public String toDataString() {
+        return "Outerwear;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + isWaterproof;
+    }
 }

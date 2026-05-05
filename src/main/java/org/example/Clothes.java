@@ -75,4 +75,11 @@ public class Clothes {
                 Objects.equals(type, clothes.type) &&
                 Objects.equals(brand, clothes.brand);
     }
+
+    /**
+     * Форматує об'єкт для запису у текстовий файл.
+     */
+    public String toDataString() {
+        return "Clothes;" + type + ";" + brand + ";" + size + ";" + price;
+    }
 }
