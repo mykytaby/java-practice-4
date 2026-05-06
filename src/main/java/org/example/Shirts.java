@@ -29,4 +29,11 @@ public class Shirts extends Clothes {
     public String toDataString() {
         return "Shirts;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + shortSleeves;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) return false;
+        Shirts shirts = (Shirts) o;
+        return shortSleeves == shirts.shortSleeves;
+    }
 }

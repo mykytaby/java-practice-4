@@ -29,4 +29,11 @@ public class Dress extends Clothes {
     public String toDataString() {
         return "Dress;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + isEvening;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) return false;
+        Dress dress = (Dress) o;
+        return isEvening == dress.isEvening;
+    }
 }

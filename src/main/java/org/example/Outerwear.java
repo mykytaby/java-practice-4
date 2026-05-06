@@ -29,4 +29,11 @@ public class Outerwear extends Clothes {
     public String toDataString() {
         return "Outerwear;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + isWaterproof;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) return false;
+        Outerwear outerwear = (Outerwear) o;
+        return isWaterproof == outerwear.isWaterproof;
+    }
 }
