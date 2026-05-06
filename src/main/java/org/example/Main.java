@@ -1,7 +1,6 @@
 package org.example;
 
 import java.io.File;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -17,36 +16,32 @@ public class Main {
 
         ArrayList<Clothes> wardrobe = new ArrayList<>();
 
-        System.out.println("=== Практична робота №9. Робота з файлами ===");
+        System.out.println("=== Практична робота №10. Пошук у колекціях ===");
         
-        // Зчитуємо дані з файлу при запуску
         loadFromFile(FILE_NAME, wardrobe);
 
         while (true) {
             System.out.println("\n--- ГОЛОВНЕ МЕНЮ ---");
-            System.out.println("1. Створити новий об'єкт");
-            System.out.println("2. Вивести інформацію про всі об'єкти");
-            System.out.println("3. Завершити роботу програми (і зберегти дані)");
+            System.out.println("1. Пошук об'єкта"); // Додано нову опцію
+            System.out.println("2. Створити новий об'єкт");
+            System.out.println("3. Вивести інформацію про всі об'єкти");
+            System.out.println("4. Завершити роботу програми (і зберегти дані)");
             System.out.print("Оберіть дію: ");
 
             String mainChoice = scanner.nextLine();
 
             switch (mainChoice) {
                 case "1":
-                    handleCreationMenu(scanner, wardrobe);
+                    handleSearchMenu(scanner, wardrobe);
                     break;
                 case "2":
-                    System.out.println("\nВаш гардероб (Кількість речей: " + wardrobe.size() + "):");
-                    if (wardrobe.isEmpty()) {
-                        System.out.println("Колекція порожня.");
-                    } else {
-                        for (int i = 0; i < wardrobe.size(); i++) {
-                            System.out.println((i + 1) + ". " + wardrobe.get(i).toString());
-                        }
-                    }
+                    handleCreationMenu(scanner, wardrobe);
                     break;
                 case "3":
-                    // Зберігаємо дані перед виходом
+                    System.out.println("\nВаш гардероб (Кількість речей: " + wardrobe.size() + "):");
+                    printList(wardrobe);
+                    break;
+                case "4":
                     saveToFile(FILE_NAME, wardrobe);
                     System.out.println("Програму успішно завершено!");
                     scanner.close();
@@ -56,6 +51,111 @@ public class Main {
             }
         }
     }
+
+    // --- ЛОГІКА ПОШУКУ ---
+
+    private static void handleSearchMenu(Scanner scanner, ArrayList<Clothes> wardrobe) {
+        System.out.println("\n--- МЕНЮ ПОШУКУ ---");
+        System.out.println("1. Знайти за розміром");
+        System.out.println("2. Знайти за брендом");
+        System.out.println("3. Знайти за діапазоном ціни");
+        System.out.println("4. Повернутися до головного меню");
+        System.out.print("Оберіть критерій: ");
+
+        String searchChoice = scanner.nextLine();
+        
+        if (searchChoice.equals("4")) return;
+
+        ArrayList<Clothes> results = new ArrayList<>();
+
+        try {
+            switch (searchChoice) {
+                case "1":
+                    System.out.print("Введіть розмір для пошуку (XS, S, M, L, XL, XXL): ");
+                    Size targetSize = Size.valueOf(scanner.nextLine().toUpperCase().trim());
+                    results = searchBySize(wardrobe, targetSize);
+                    break;
+                case "2":
+                    System.out.print("Введіть бренд для пошуку: ");
+                    String targetBrand = scanner.nextLine();
+                    results = searchByBrand(wardrobe, targetBrand);
+                    break;
+                case "3":
+                    System.out.print("Введіть мінімальну ціну: ");
+                    double minPrice = scanner.nextDouble();
+                    System.out.print("Введіть максимальну ціну: ");
+                    double maxPrice = scanner.nextDouble();
+                    scanner.nextLine(); // очищення буфера
+                    
+                    if (minPrice > maxPrice) {
+                        System.out.println("Мінімальна ціна не може бути більшою за максимальну.");
+                        return;
+                    }
+                    results = searchByPriceRange(wardrobe, minPrice, maxPrice);
+                    break;
+                default:
+                    System.out.println("Некоректний вибір.");
+                    return;
+            }
+
+            // Виведення результатів
+            System.out.println("\nРезультати пошуку:");
+            printList(results);
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Помилка вводу: Такого розміру не існує.");
+        } catch (InputMismatchException e) {
+            System.out.println("Помилка вводу: Некоректний формат числа.");
+            scanner.nextLine();
+        }
+    }
+
+    // Метод пошуку 1: За розміром
+    private static ArrayList<Clothes> searchBySize(ArrayList<Clothes> list, Size targetSize) {
+        ArrayList<Clothes> found = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getSize() == targetSize) {
+                found.add(list.get(i));
+            }
+        }
+        return found;
+    }
+
+    // Метод пошуку 2: За брендом (без урахування регістру)
+    private static ArrayList<Clothes> searchByBrand(ArrayList<Clothes> list, String targetBrand) {
+        ArrayList<Clothes> found = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getBrand().equalsIgnoreCase(targetBrand.trim())) {
+                found.add(list.get(i));
+            }
+        }
+        return found;
+    }
+
+    // Метод пошуку 3: За діапазоном ціни
+    private static ArrayList<Clothes> searchByPriceRange(ArrayList<Clothes> list, double min, double max) {
+        ArrayList<Clothes> found = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            double price = list.get(i).getPrice();
+            if (price >= min && price <= max) {
+                found.add(list.get(i));
+            }
+        }
+        return found;
+    }
+
+    // Допоміжний метод для виведення списку
+    private static void printList(ArrayList<Clothes> list) {
+        if (list.isEmpty()) {
+            System.out.println("Нічого не знайдено / Колекція порожня.");
+        } else {
+            for (int i = 0; i < list.size(); i++) {
+                System.out.println((i + 1) + ". " + list.get(i).toString());
+            }
+        }
+    }
+
+    // --- ЛОГІКА СТВОРЕННЯ (з ПР №8-9) ---
 
     private static void handleCreationMenu(Scanner scanner, ArrayList<Clothes> wardrobe) {
         System.out.println("\n--- МЕНЮ СТВОРЕННЯ ---");
@@ -122,18 +222,13 @@ public class Main {
         }
     }
 
-    /**
-     * Метод для зчитування даних з файлу у колекцію.
-     */
+    // --- ЛОГІКА РОБОТИ З ФАЙЛАМИ (з ПР №9) ---
+
     private static void loadFromFile(String filename, ArrayList<Clothes> wardrobe) {
         File file = new File(filename);
-        if (!file.exists()) {
-            System.out.println("Файл " + filename + " не знайдено. Буде створено новий при збереженні.");
-            return;
-        }
+        if (!file.exists()) return;
 
         try (Scanner fileScanner = new Scanner(file, StandardCharsets.UTF_8.name())) {
-            int lineCount = 0;
             while (fileScanner.hasNextLine()) {
                 String line = fileScanner.nextLine();
                 if (line.trim().isEmpty()) continue;
@@ -147,46 +242,27 @@ public class Main {
                     double price = Double.parseDouble(parts[4]);
 
                     switch (className) {
-                        case "Clothes":
-                            wardrobe.add(new Clothes(type, brand, size, price));
-                            break;
-                        case "Pants":
-                            wardrobe.add(new Pants(type, brand, size, price, Boolean.parseBoolean(parts[5])));
-                            break;
-                        case "Shirts":
-                            wardrobe.add(new Shirts(type, brand, size, price, Boolean.parseBoolean(parts[5])));
-                            break;
-                        case "Outerwear":
-                            wardrobe.add(new Outerwear(type, brand, size, price, Boolean.parseBoolean(parts[5])));
-                            break;
-                        case "Dress":
-                            wardrobe.add(new Dress(type, brand, size, price, Boolean.parseBoolean(parts[5])));
-                            break;
-                        default:
-                            System.out.println("Невідомий клас у файлі: " + className);
+                        case "Clothes": wardrobe.add(new Clothes(type, brand, size, price)); break;
+                        case "Pants": wardrobe.add(new Pants(type, brand, size, price, Boolean.parseBoolean(parts[5]))); break;
+                        case "Shirts": wardrobe.add(new Shirts(type, brand, size, price, Boolean.parseBoolean(parts[5]))); break;
+                        case "Outerwear": wardrobe.add(new Outerwear(type, brand, size, price, Boolean.parseBoolean(parts[5]))); break;
+                        case "Dress": wardrobe.add(new Dress(type, brand, size, price, Boolean.parseBoolean(parts[5]))); break;
                     }
-                    lineCount++;
-                } catch (Exception e) {
-                    System.out.println("Помилка парсингу рядка: " + line);
-                }
+                } catch (Exception e) { /* Ігноруємо зламані рядки */ }
             }
-            System.out.println("Успішно завантажено об'єктів: " + lineCount);
         } catch (Exception e) {
             System.out.println("Помилка читання файлу: " + e.getMessage());
         }
     }
 
-    /**
-     * Метод для запису колекції у файл.
-     */
     private static void saveToFile(String filename, ArrayList<Clothes> wardrobe) {
         try (PrintWriter writer = new PrintWriter(new File(filename), StandardCharsets.UTF_8.name())) {
             for (int i = 0; i < wardrobe.size(); i++) {
                 writer.println(wardrobe.get(i).toDataString());
             }
-            System.out.println("\n[!] Всі дані успішно збережено у файл: " + filename);
+            System.out.println("\n[!] Дані успішно збережено у файл.");
         } catch (Exception e) {
-            System.out.println("\n[!] Помилка збереження у файл: " + e.getMessage());
+            System.out.println("\n[!] Помилка збереження: " + e.getMessage());
         }
     }
 }
