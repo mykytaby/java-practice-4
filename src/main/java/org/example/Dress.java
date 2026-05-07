@@ -15,17 +15,6 @@ public class Dress extends Clothes {
     public void setEvening(boolean evening) { this.isEvening = evening; }
 
     @Override
-    public String toString() {
-        return "Dress{" +
-                "type='" + getType() + '\'' +
-                ", brand='" + getBrand() + '\'' +
-                ", size=" + getSize() +
-                ", price=" + getPrice() +
-                ", isEvening=" + isEvening +
-                '}';
-    }
-
-    @Override
     public String toDataString() {
         return "Dress;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + isEvening;
     }

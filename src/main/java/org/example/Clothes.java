@@ -3,66 +3,46 @@ package org.example;
 import java.util.Objects;
 
 /**
- * Базовий клас, що описує предмет одягу.
+ * Абстрактний батьківський клас.
+ * Реалізує Comparable для сортування за брендом та ціною.
  */
-public class Clothes {
+public abstract class Clothes implements Comparable<Clothes> {
     private String type;
     private String brand;
-    private Size size; 
+    private Size size;
     private double price;
 
     public Clothes(String type, String brand, Size size, double price) {
-        setType(type);
-        setBrand(brand);
-        setSize(size);
-        setPrice(price);
-    }
-
-    public Clothes(Clothes other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Об'єкт для копіювання не може бути null.");
-        }
-        this.type = other.type;
-        this.brand = other.brand;
-        this.size = other.size;
-        this.price = other.price;
-    }
-
-    public String getType() { return type; }
-    public void setType(String type) {
-        if (type == null || type.trim().isEmpty()) {
-            throw new IllegalArgumentException("Тип одягу не може бути порожнім.");
-        }
         this.type = type;
-    }
-
-    public String getBrand() { return brand; }
-    public void setBrand(String brand) {
-        if (brand == null || brand.trim().isEmpty()) {
-            throw new IllegalArgumentException("Бренд не може бути порожнім.");
-        }
         this.brand = brand;
-    }
-
-    public Size getSize() { return size; }
-    public void setSize(Size size) {
-        if (size == null) {
-            throw new IllegalArgumentException("Розмір не може бути null.");
-        }
         this.size = size;
-    }
-
-    public double getPrice() { return price; }
-    public void setPrice(double price) {
-        if (price <= 0) {
-            throw new IllegalArgumentException("Ціна повинна бути більшою за нуль.");
-        }
         this.price = price;
     }
 
+    // Реалізація інтерфейсу Comparable
+    @Override
+    public int compareTo(Clothes other) {
+        // 1. Порівнюємо за брендом (алфавітний порядок, ігноруючи регістр)
+        int brandCompare = this.brand.compareToIgnoreCase(other.brand);
+        if (brandCompare != 0) {
+            return brandCompare;
+        }
+        // 2. Якщо бренди однакові, порівнюємо за ціною (від меншої до більшої)
+        return Double.compare(this.price, other.price);
+    }
+
+    public String getType() { return type; }
+    public String getBrand() { return brand; }
+    public Size getSize() { return size; }
+    public double getPrice() { return price; }
+
+    // Абстрактний метод для збереження у файл
+    public abstract String toDataString();
+
     @Override
     public String toString() {
-        return "Clothes{type='" + type + "', brand='" + brand + "', size=" + size + ", price=" + price + "}";
+        return String.format("[%s] Бренд: %-10s | Тип: %-12s | Розмір: %-3s | Ціна: %8.2f", 
+                this.getClass().getSimpleName(), getBrand(), getType(), getSize(), getPrice());
     }
 
     @Override
@@ -71,15 +51,8 @@ public class Clothes {
         if (o == null || getClass() != o.getClass()) return false;
         Clothes clothes = (Clothes) o;
         return Double.compare(clothes.price, price) == 0 &&
-                size == clothes.size &&
                 Objects.equals(type, clothes.type) &&
-                Objects.equals(brand, clothes.brand);
-    }
-
-    /**
-     * Форматує об'єкт для запису у текстовий файл.
-     */
-    public String toDataString() {
-        return "Clothes;" + type + ";" + brand + ";" + size + ";" + price;
+                Objects.equals(brand, clothes.brand) &&
+                size == clothes.size;
     }
 }

@@ -89,24 +89,41 @@ public class Main {
     }
 
     private static void loadFromFile(String f, Store s) {
-        File file = new File(f);
-        if (!file.exists()) return;
-        try (Scanner fs = new Scanner(file, "UTF-8")) {
-            while (fs.hasNextLine()) {
-                String[] p = fs.nextLine().split(";");
+    File file = new File(f);
+    if (!file.exists()) {
+        System.out.println("[DEBUG] Файл " + f + " не знайдено за шляхом: " + file.getAbsolutePath());
+        return;
+    }
+    try (Scanner fs = new Scanner(file, "UTF-8")) {
+        int count = 0;
+        while (fs.hasNextLine()) {
+            String line = fs.nextLine();
+            if (line.trim().isEmpty()) continue;
+            String[] p = line.split(";");
+            try {
                 Clothes cl = null;
-                Size sz = Size.valueOf(p[3]);
+                Size sz = Size.valueOf(p[3].toUpperCase());
                 double pr = Double.parseDouble(p[4]);
-                int q = Integer.parseInt(p[p.length-1]);
+                int q = Integer.parseInt(p[p.length - 1]); // Останнє число - кількість
+
                 if (p[0].equals("Pants")) cl = new Pants(p[1], p[2], sz, pr, Boolean.parseBoolean(p[5]));
                 else if (p[0].equals("Shirts")) cl = new Shirts(p[1], p[2], sz, pr, Boolean.parseBoolean(p[5]));
                 else if (p[0].equals("Outerwear")) cl = new Outerwear(p[1], p[2], sz, pr, Boolean.parseBoolean(p[5]));
                 else if (p[0].equals("Dress")) cl = new Dress(p[1], p[2], sz, pr, Boolean.parseBoolean(p[5]));
-                if (cl != null) s.addNewClothes(cl, q);
+                
+                if (cl != null) {
+                    s.addNewClothes(cl, q);
+                    count++;
+                }
+            } catch (Exception e) {
+                System.out.println("[DEBUG] Помилка в рядку: " + line + " -> " + e.getMessage());
             }
-        } catch (Exception e) {}
+        }
+        System.out.println("[DEBUG] Завантажено об'єктів: " + count);
+    } catch (Exception e) {
+        System.out.println("[DEBUG] Критична помилка читання: " + e.getMessage());
     }
-
+}
     private static void saveToFile(String f, Store s) {
         try (PrintWriter w = new PrintWriter(new File(f), "UTF-8")) {
             for (StoreItem i : s.getInventory()) w.println(i.getClothes().toDataString() + ";" + i.getQuantity());

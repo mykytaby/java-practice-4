@@ -1,9 +1,9 @@
 package org.example;
 
 /**
- * Клас-обгортка для зберігання об'єкта одягу та його кількості в магазині.
+ * Обгортка, яка також реалізує Comparable для сортування асортименту магазину.
  */
-public class StoreItem {
+public class StoreItem implements Comparable<StoreItem> {
     private Clothes clothes;
     private int quantity;
 
@@ -12,12 +12,18 @@ public class StoreItem {
         this.quantity = quantity;
     }
 
+    @Override
+    public int compareTo(StoreItem other) {
+        // Використовуємо логіку порівняння самого одягу
+        return this.clothes.compareTo(other.getClothes());
+    }
+
     public Clothes getClothes() { return clothes; }
     public int getQuantity() { return quantity; }
     public void addQuantity(int amount) { this.quantity += amount; }
 
     @Override
     public String toString() {
-        return clothes.toString() + " | В наявності: " + quantity + " шт.";
+        return clothes.toString() + " | К-сть: " + quantity;
     }
 }

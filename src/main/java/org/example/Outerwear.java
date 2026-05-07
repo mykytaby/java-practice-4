@@ -15,17 +15,6 @@ public class Outerwear extends Clothes {
     public void setWaterproof(boolean waterproof) { this.isWaterproof = waterproof; }
 
     @Override
-    public String toString() {
-        return "Outerwear{" +
-                "type='" + getType() + '\'' +
-                ", brand='" + getBrand() + '\'' +
-                ", size=" + getSize() +
-                ", price=" + getPrice() +
-                ", isWaterproof=" + isWaterproof +
-                '}';
-    }
-
-    @Override
     public String toDataString() {
         return "Outerwear;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + isWaterproof;
     }

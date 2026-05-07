@@ -15,17 +15,6 @@ public class Pants extends Clothes {
     public void setHasBelt(boolean hasBelt) { this.hasBelt = hasBelt; }
 
     @Override
-    public String toString() {
-        // Перевизначаємо toString для демонстрації поліморфізму
-        return "Pants{" +
-                "brand='" + getBrand() + '\'' +
-                ", size=" + getSize() +
-                ", price=" + getPrice() +
-                ", hasBelt=" + hasBelt +
-                '}';
-    }
-
-    @Override
     public String toDataString() {
         return "Pants;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + hasBelt;
     }

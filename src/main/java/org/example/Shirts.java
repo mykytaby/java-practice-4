@@ -15,17 +15,6 @@ public class Shirts extends Clothes {
     public void setShortSleeves(boolean shortSleeves) { this.shortSleeves = shortSleeves; }
 
     @Override
-    public String toString() {
-        // Перевизначаємо toString для демонстрації поліморфізму
-        return "Shirts{" +
-                "brand='" + getBrand() + '\'' +
-                ", size=" + getSize() +
-                ", price=" + getPrice() +
-                ", shortSleeves=" + shortSleeves +
-                '}';
-    }
-
-    @Override
     public String toDataString() {
         return "Shirts;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + shortSleeves;
     }
