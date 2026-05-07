@@ -13,7 +13,7 @@ public class Main {
         } catch (Exception e) {}
 
         Scanner scanner = new Scanner(System.in, "UTF-8");
-        Store store = new Store("Магазин з Comparator");
+        Store store = new Store("Магазин з Лямбда-виразами");
 
         loadFromFile(FILE_NAME, store);
 
@@ -22,7 +22,7 @@ public class Main {
             System.out.println("1. Пошук товару");
             System.out.println("2. Додати новий товар");
             System.out.println("3. Вивести весь асортимент");
-            System.out.println("4. Сортувати та вивести асортимент (Comparator)");
+            System.out.println("4. Сортувати асортимент (Lambda expressions)");
             System.out.println("5. Завершити роботу");
             System.out.print("Вибір: ");
 
@@ -32,7 +32,7 @@ public class Main {
                 case "1": handleSearch(scanner, store); break;
                 case "2": handleCreation(scanner, store); break;
                 case "3": printList(store.getInventory()); break;
-                case "4": handleSortMenu(scanner, store); break; // Новий метод підменю
+                case "4": handleSortMenu(scanner, store); break;
                 case "5":
                     saveToFile(FILE_NAME, store);
                     System.out.println("Дані збережено. Вихід...");
@@ -43,19 +43,19 @@ public class Main {
     }
 
     /**
-     * ПРАКТИЧНА №14: Підменю сортування з використанням анонімних класів.
+     * ЛАБОРАТОРНА №15: Використання лямбда-виразів для сортування.
      */
     private static void handleSortMenu(Scanner scanner, Store store) {
         if (store.getInventory().isEmpty()) {
-            System.out.println("Список порожній, нічого сортувати.");
+            System.out.println("Список порожній.");
             return;
         }
 
         System.out.println("\n--- ОБЕРІТЬ КРИТЕРІЙ СОРТУВАННЯ ---");
-        System.out.println("1. Сортувати за ЦІНОЮ (від найдешевшого)");
-        System.out.println("2. Сортувати за КІЛЬКІСТЮ (від найбільшої)");
-        System.out.println("3. Сортувати за НАЗВОЮ МОДЕЛІ (алфавіт)");
-        System.out.println("0. Повернутися в головне меню");
+        System.out.println("1. За ціною (лямбда)");
+        System.out.println("2. За кількістю (лямбда)");
+        System.out.println("3. За назвою моделі (лямбда)");
+        System.out.println("0. Назад");
         System.out.print("Вибір: ");
 
         String sortChoice = scanner.nextLine();
@@ -63,37 +63,21 @@ public class Main {
 
         switch (sortChoice) {
             case "1":
-                // Анонімний клас для сортування за ціною
-                Collections.sort(sortedList, new Comparator<StoreItem>() {
-                    @Override
-                    public int compare(StoreItem o1, StoreItem o2) {
-                        return Double.compare(o1.getClothes().getPrice(), o2.getClothes().getPrice());
-                    }
-                });
-                System.out.println("\nРезультат: Сортування за ціною виконано.");
+                // Заміна анонімного класу на лямбда-вираз (Ціна)
+                Collections.sort(sortedList, (o1, o2) -> Double.compare(o1.getClothes().getPrice(), o2.getClothes().getPrice()));
+                System.out.println("\n[Lambda] Відсортовано за ціною.");
                 break;
 
             case "2":
-                // Анонімний клас для сортування за кількістю (Descending)
-                Collections.sort(sortedList, new Comparator<StoreItem>() {
-                    @Override
-                    public int compare(StoreItem o1, StoreItem o2) {
-                        // o2 порівнюємо з o1 для сортування від більшого до меншого
-                        return Integer.compare(o2.getQuantity(), o1.getQuantity());
-                    }
-                });
-                System.out.println("\nРезультат: Сортування за кількістю виконано.");
+                // Заміна анонімного класу на лямбда-вираз (Кількість)
+                Collections.sort(sortedList, (o1, o2) -> Integer.compare(o2.getQuantity(), o1.getQuantity()));
+                System.out.println("\n[Lambda] Відсортовано за кількістю (спадання).");
                 break;
 
             case "3":
-                // Анонімний клас для сортування за назвою моделі (Type)
-                Collections.sort(sortedList, new Comparator<StoreItem>() {
-                    @Override
-                    public int compare(StoreItem o1, StoreItem o2) {
-                        return o1.getClothes().getType().compareToIgnoreCase(o2.getClothes().getType());
-                    }
-                });
-                System.out.println("\nРезультат: Сортування за назвою моделі виконано.");
+                // Заміна анонімного класу на лямбда-вираз (Тип моделі)
+                Collections.sort(sortedList, (o1, o2) -> o1.getClothes().getType().compareToIgnoreCase(o2.getClothes().getType()));
+                System.out.println("\n[Lambda] Відсортовано за назвою.");
                 break;
 
             case "0":
@@ -112,7 +96,7 @@ public class Main {
         if (c.equals("5")) return;
 
         try {
-            System.out.print("Назва моделі (тип): "); String type = scanner.nextLine();
+            System.out.print("Назва моделі: "); String type = scanner.nextLine();
             System.out.print("Бренд: "); String brand = scanner.nextLine();
             System.out.print("Розмір (XS-XXL): "); Size sz = Size.valueOf(scanner.nextLine().toUpperCase());
             System.out.print("Ціна: "); double pr = Double.parseDouble(scanner.nextLine());
