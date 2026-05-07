@@ -1,4 +1,5 @@
 package org.example;
+
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -23,35 +24,31 @@ public class Store {
         for (StoreItem item : inventory) {
             if (item.getClothes().getUuid().equals(id)) return item;
         }
-        return null;
+        // Кидаємо власний виняток (ЛР 18)
+        throw new ObjectNotFoundException("Об'єкт з UUID " + id + " не знайдено в магазині!");
     }
 
-    // --- НОВІ МЕТОДИ ЗГІДНО ЛР 17 ---
-
-    /**
-     * Завдання 1: Модифікація об'єкта (update)
-     */
     public boolean update(StoreItem existingObject, StoreItem newObject) {
         if (existingObject == null || newObject == null) return false;
         
         int index = inventory.indexOf(existingObject);
         if (index != -1) {
-            inventory.set(index, newObject); // Замінюємо старий об'єкт новим
+            inventory.set(index, newObject); 
             return true;
         }
         return false;
     }
 
-    /**
-     * Завдання 2: Видалення об'єкта (delete)
-     */
     public boolean delete(StoreItem existingObject) {
         if (existingObject == null) return false;
-        // Метод remove використовує перевизначений equals() у StoreItem
-        return inventory.remove(existingObject); 
+        
+        if (inventory.remove(existingObject)) {
+            return true;
+        }
+        // Кидаємо власний виняток (ЛР 18)
+        throw new ObjectNotFoundException("Не вдалося видалити: об'єкт відсутній у колекції.");
     }
 
-    // Методи пошуку з попередніх ЛР
     public ArrayList<StoreItem> searchBySize(Size sz) {
         ArrayList<StoreItem> res = new ArrayList<>();
         for (StoreItem i : inventory) if (i.getClothes().getSize() == sz) res.add(i);

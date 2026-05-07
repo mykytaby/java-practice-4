@@ -39,8 +39,8 @@ public abstract class Clothes implements Identifiable, Comparable<Clothes> {
     public double getPrice() { return price; }
     
     public void setPrice(double price) {
-        if (price <= 0) throw new IllegalArgumentException("Ціна повинна бути > 0");
-        this.price = price;
+        if (price <= 0) throw new InvalidClothesDataException("Ціна повинна бути > 0");
+        setPrice(price);
     }
 
     public abstract String toDataString();

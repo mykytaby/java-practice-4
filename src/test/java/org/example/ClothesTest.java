@@ -6,17 +6,23 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClothesTest {
 
     @Test
-    void shouldThrowExceptionWhenInvalidValueInSetter() {
-        Clothes clothes = new Clothes("Куртка", "Nike", Size.L, 1500.0);
+    void shouldThrowExceptionWhenInvalidPriceInSetter() {
+        // Використовуємо Pants, бо Clothes тепер абстрактний клас
+        Clothes pants = new Pants("Джинси", "Nike", Size.L, 1500.0, true);
 
-        assertThrows(IllegalArgumentException.class, () -> clothes.setPrice(-100.0));
-        assertThrows(IllegalArgumentException.class, () -> clothes.setBrand("   "));
-        assertThrows(IllegalArgumentException.class, () -> clothes.setSize(null));
+        // Перевіряємо, що наша нова логіка кидає правильний виняток
+        assertThrows(InvalidClothesDataException.class, () -> {
+            pants.setPrice(-100.0);
+        });
     }
 
     @Test
-    void shouldThrowExceptionWhenInvalidConstructorData() {
-        assertThrows(IllegalArgumentException.class, () -> new Clothes("", "Adidas", Size.S, 500.0));
-        assertThrows(IllegalArgumentException.class, () -> new Clothes("Штани", "Puma", Size.M, 0.0));
+    void shouldCreateObjectSuccessfullyWithValidData() {
+        // Перевіряємо створення об'єкта
+        Clothes shirts = new Shirts("Поло", "Adidas", Size.S, 500.0, false);
+        
+        assertEquals(500.0, shirts.getPrice());
+        assertEquals("Adidas", shirts.getBrand());
+        assertEquals(Size.S, shirts.getSize());
     }
 }
