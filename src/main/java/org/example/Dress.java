@@ -1,28 +1,31 @@
 package org.example;
 
-/**
- * Похідний клас "Сукня", успадкований від Clothes.
- */
-public class Dress extends Clothes {
-    private boolean isEvening; // Чи є вечірньою сукнею
+import java.util.UUID;
 
+public class Dress extends Clothes {
+    private boolean isEvening;
+
+    // Конструктор для створення НОВОГО об'єкта (UUID згенерується автоматично)
     public Dress(String type, String brand, Size size, double price, boolean isEvening) {
         super(type, brand, size, price);
         this.isEvening = isEvening;
     }
 
-    public boolean isEvening() { return isEvening; }
-    public void setEvening(boolean evening) { this.isEvening = evening; }
+    // Конструктор для завантаження ІСНУЮЧОГО об'єкта з файлу (з передачею UUID)
+    public Dress(UUID uuid, String type, String brand, Size size, double price, boolean isEvening) {
+        super(uuid, type, brand, size, price);
+        this.isEvening = isEvening;
+    }
+
+    public boolean isEvening() { 
+        return isEvening; 
+    }
+
+    public void setEvening(boolean isEvening) {
+        this.isEvening = isEvening;
+    }
 
     @Override
     public String toDataString() {
-        return "Dress;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + isEvening;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!super.equals(o)) return false;
-        Dress dress = (Dress) o;
-        return isEvening == dress.isEvening;
-    }
-}
+        // Формат: Клас;UUID;Тип;Бренд;Розмір;Ціна;ВласнеПоле
+        return "Dress;" + getUuid() + ";" + getType() + ";" + getBrand() + ";" + getS

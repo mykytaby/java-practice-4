@@ -1,34 +1,36 @@
 package org.example;
 
 import java.util.Objects;
+import java.util.UUID;
 
-/**
- * Абстрактний батьківський клас.
- * Реалізує Comparable для сортування за брендом та ціною.
- */
-public abstract class Clothes implements Comparable<Clothes> {
+public abstract class Clothes implements Identifiable, Comparable<Clothes> {
+    private final UUID uuid;
     private String type;
     private String brand;
     private Size size;
     private double price;
 
+    // Конструктор для нових об'єктів
     public Clothes(String type, String brand, Size size, double price) {
+        this(UUID.randomUUID(), type, brand, size, price);
+    }
+
+    // Конструктор для відновлення з файлу
+    public Clothes(UUID uuid, String type, String brand, Size size, double price) {
+        this.uuid = uuid;
         this.type = type;
         this.brand = brand;
         this.size = size;
         this.price = price;
     }
 
-    // Реалізація інтерфейсу Comparable
+    @Override
+    public UUID getUuid() { return uuid; }
+
     @Override
     public int compareTo(Clothes other) {
-        // 1. Порівнюємо за брендом (алфавітний порядок, ігноруючи регістр)
         int brandCompare = this.brand.compareToIgnoreCase(other.brand);
-        if (brandCompare != 0) {
-            return brandCompare;
-        }
-        // 2. Якщо бренди однакові, порівнюємо за ціною (від меншої до більшої)
-        return Double.compare(this.price, other.price);
+        return (brandCompare != 0) ? brandCompare : Double.compare(this.price, other.price);
     }
 
     public String getType() { return type; }
@@ -36,13 +38,17 @@ public abstract class Clothes implements Comparable<Clothes> {
     public Size getSize() { return size; }
     public double getPrice() { return price; }
 
-    // Абстрактний метод для збереження у файл
     public abstract String toDataString();
 
     @Override
     public String toString() {
-        return String.format("[%s] Бренд: %-10s | Тип: %-12s | Розмір: %-3s | Ціна: %8.2f", 
-                this.getClass().getSimpleName(), getBrand(), getType(), getSize(), getPrice());
+        return String.format("[%s] %-10s %-12s | Ціна: %8.2f | ID: %s", 
+                this.getClass().getSimpleName(), brand, type, price, uuid.toString().substring(0, 8));
+    }
+
+    public String getFullDetails() {
+        return String.format("Клас: %s\nТип: %s\nБренд: %s\nРозмір: %s\nЦіна: %.2f\nUUID: %s", 
+                this.getClass().getSimpleName(), type, brand, size, price, uuid.toString());
     }
 
     @Override
@@ -50,9 +56,9 @@ public abstract class Clothes implements Comparable<Clothes> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Clothes clothes = (Clothes) o;
-        return Double.compare(clothes.price, price) == 0 &&
-                Objects.equals(type, clothes.type) &&
-                Objects.equals(brand, clothes.brand) &&
-                size == clothes.size;
+        return Objects.equals(uuid, clothes.uuid);
     }
+
+    @Override
+    public int hashCode() { return Objects.hash(uuid); }
 }

@@ -1,28 +1,33 @@
 package org.example;
 
-/**
- * Похідний клас "Верхній одяг", успадкований від Clothes.
- */
-public class Outerwear extends Clothes {
-    private boolean isWaterproof; // Чи є водонепроникним
+import java.util.UUID;
 
+public class Outerwear extends Clothes {
+    private boolean isWaterproof;
+
+    // Конструктор для створення НОВОГО об'єкта (UUID згенерується автоматично)
     public Outerwear(String type, String brand, Size size, double price, boolean isWaterproof) {
         super(type, brand, size, price);
         this.isWaterproof = isWaterproof;
     }
 
-    public boolean isWaterproof() { return isWaterproof; }
-    public void setWaterproof(boolean waterproof) { this.isWaterproof = waterproof; }
+    // Конструктор для завантаження ІСНУЮЧОГО об'єкта з файлу (з передачею UUID)
+    public Outerwear(UUID uuid, String type, String brand, Size size, double price, boolean isWaterproof) {
+        super(uuid, type, brand, size, price);
+        this.isWaterproof = isWaterproof;
+    }
 
-    @Override
-    public String toDataString() {
-        return "Outerwear;" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + isWaterproof;
+    public boolean isWaterproof() { 
+        return isWaterproof; 
+    }
+
+    public void setWaterproof(boolean isWaterproof) {
+        this.isWaterproof = isWaterproof;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!super.equals(o)) return false;
-        Outerwear outerwear = (Outerwear) o;
-        return isWaterproof == outerwear.isWaterproof;
+    public String toDataString() {
+        // Формат: Клас;UUID;Тип;Бренд;Розмір;Ціна;ВласнеПоле
+        return "Outerwear;" + getUuid() + ";" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + isWaterproof;
     }
 }
