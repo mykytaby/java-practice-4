@@ -10,33 +10,38 @@ import java.util.Scanner;
 
 public class Main {
     private static final String FILE_NAME = "input.txt";
-    private static DatabaseManager dbManager; // Поле для БД
+    private static DatabaseManager dbManager; // Поле для роботи з БД
 
     public static void main(String[] args) {
-        // Перевірка аргументів
+        // 1. Перевірка аргументів командного рядка
         if (args.length == 0) {
-            System.out.println("Помилка: вкажіть шлях до файлу конфігурації БД в аргументах!");
+            System.out.println("Помилка: вкажіть шлях до файлу конфігурації БД (наприклад, db.properties) в аргументах!");
             return;
         }
 
+        // 2. Ініціалізація DatabaseManager через файл конфігурації
         try {
             dbManager = new DatabaseManager(args[0]);
-            System.out.println("Конфігурація БД завантажена: " + args[0]);
+            System.out.println("Конфігурація БД завантажена з файлу: " + args[0]);
         } catch (Exception e) {
-            System.err.println("Помилка ініціалізації БД: " + e.getMessage());
+            System.err.println("Критична помилка ініціалізації БД: " + e.getMessage());
             return;
         }
 
-        System.setOut(new java.io.PrintStream(System.out, true, java.nio.charset.StandardCharsets.UTF_8));
-        Scanner scanner = new Scanner(System.in, java.nio.charset.StandardCharsets.UTF_8.name());
+        // Налаштування виводу та вводу для підтримки UTF-8
+        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
+        
+        // Ініціалізація Магазину (Клас-контейнер з ПР №11)
         Store myStore = new Store("Магазин Одягу з JDBC");
 
+        // Завантаження початкових даних з текстового файлу (ПР №9-11)
         loadFromFile(FILE_NAME, myStore);
 
         while (true) {
             System.out.println("\n--- ГОЛОВНЕ МЕНЮ (" + myStore.getName() + ") ---");
             System.out.println("1. Пошук товару");
-            System.out.println("2. Додати товар в магазин (з кількістю)");
+            System.out.println("2. Додати товар в магазин (збереження в Колекцію + БД)");
             System.out.println("3. Вивести весь асортимент");
             System.out.println("4. Завершити роботу програми");
             System.out.print("Оберіть дію: ");
@@ -81,23 +86,23 @@ public class Main {
         try {
             switch (searchChoice) {
                 case "1":
-                    System.out.print("Введіть розмір: ");
+                    System.out.print("Введіть розмір (XS, S, M, L, XL, XXL): ");
                     Size targetSize = Size.valueOf(scanner.nextLine().toUpperCase().trim());
                     results = store.searchBySize(targetSize);
                     break;
                 case "2":
-                    System.out.print("Введіть бренд: ");
+                    System.out.print("Введіть бренд для пошуку: ");
                     String targetBrand = scanner.nextLine();
                     results = store.searchByBrand(targetBrand);
                     break;
                 case "3":
-                    System.out.print("Мін. ціна: ");
+                    System.out.print("Введіть мінімальну ціну: ");
                     double minPrice = scanner.nextDouble();
-                    System.out.print("Макс. ціна: ");
+                    System.out.print("Введіть максимальну ціну: ");
                     double maxPrice = scanner.nextDouble();
                     scanner.nextLine();
                     if (minPrice > maxPrice) {
-                        System.out.println("Помилка: мін > макс.");
+                        System.out.println("Помилка: мінімальна ціна не може бути більшою за максимальну.");
                         return;
                     }
                     results = store.searchByPriceRange(minPrice, maxPrice);
@@ -167,13 +172,22 @@ public class Main {
             }
             if (scanner.hasNextLine()) scanner.nextLine();
             
-            store.addNewClothes(newClothes, quantity);
-            System.out.println("Товар успішно додано / оновлено кількість!");
+            if (newClothes != null) {
+                // 1. Додавання в локальну колекцію (ПР №11)
+                store.addNewClothes(newClothes, quantity);
+                
+                // 2. Збереження в Базу Даних через JDBC (ПР №12)
+                if (dbManager != null) {
+                    dbManager.saveClothes(newClothes);
+                }
+                
+                System.out.println("Товар успішно додано в Магазин та базу даних!");
+            }
 
         } catch (IllegalArgumentException e) {
             System.out.println("Помилка: " + e.getMessage());
         } catch (InputMismatchException e) {
-            System.out.println("Помилка вводу!");
+            System.out.println("Помилка вводу: некоректний формат!");
             scanner.nextLine();
         }
     }
@@ -187,8 +201,6 @@ public class Main {
             }
         }
     }
-
-    // --- РОБОТА З ФАЙЛАМИ ---
 
     private static void loadFromFile(String filename, Store store) {
         File file = new File(filename);
@@ -207,7 +219,6 @@ public class Main {
                     Size size = Size.valueOf(parts[3]);
                     double price = Double.parseDouble(parts[4]);
                     
-                    // Кількість завжди записана в кінці (останній елемент масиву)
                     int quantity = Integer.parseInt(parts[parts.length - 1]);
                     Clothes cl = null;
 
@@ -221,7 +232,7 @@ public class Main {
                     if (cl != null) {
                         store.addNewClothes(cl, quantity);
                     }
-                } catch (Exception e) { /* Ігноруємо зламані рядки */ }
+                } catch (Exception e) { /* Пропускаємо некоректні рядки */ }
             }
         } catch (Exception e) {
             System.out.println("Помилка читання файлу: " + e.getMessage());
@@ -232,12 +243,11 @@ public class Main {
         try (PrintWriter writer = new PrintWriter(new File(filename), StandardCharsets.UTF_8.name())) {
             ArrayList<StoreItem> items = store.getInventory();
             for (int i = 0; i < items.size(); i++) {
-                // Записуємо дані об'єкта + ";" + кількість
                 writer.println(items.get(i).getClothes().toDataString() + ";" + items.get(i).getQuantity());
             }
-            System.out.println("\n[!] Дані успішно збережено у файл.");
+            System.out.println("\n[!] Дані успішно синхронізовано з файлом " + filename);
         } catch (Exception e) {
-            System.out.println("\n[!] Помилка збереження: " + e.getMessage());
+            System.out.println("\n[!] Помилка збереження у файл: " + e.getMessage());
         }
     }
 }
