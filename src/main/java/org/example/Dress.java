@@ -28,4 +28,6 @@ public class Dress extends Clothes {
     @Override
     public String toDataString() {
         // Формат: Клас;UUID;Тип;Бренд;Розмір;Ціна;ВласнеПоле
-        return "Dress;" + getUuid() + ";" + getType() + ";" + getBrand() + ";" + getS
+        return "Dress;" + getUuid() + ";" + getType() + ";" + getBrand() + ";" + getSize() + ";" + getPrice() + ";" + isEvening;
+    }
+}

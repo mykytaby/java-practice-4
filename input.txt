@@ -1,3 +1,0 @@
-Pants;Джинси;Levis;M;3500.0;true;10
-Shirts;Поло;Lacoste;L;2100.0;true;5
-Outerwear;Куртка;Nike;XL;8000.0;true;2
