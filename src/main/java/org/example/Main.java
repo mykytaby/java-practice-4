@@ -13,7 +13,7 @@ public class Main {
         } catch (Exception e) {}
 
         Scanner scanner = new Scanner(System.in, "UTF-8");
-        Store store = new Store("Мій Абстрактний Магазин");
+        Store store = new Store("Магазин з Comparator");
 
         loadFromFile(FILE_NAME, store);
 
@@ -22,7 +22,7 @@ public class Main {
             System.out.println("1. Пошук товару");
             System.out.println("2. Додати новий товар");
             System.out.println("3. Вивести весь асортимент");
-            System.out.println("4. Вивести ВІДСОРТОВАНИЙ асортимент (Comparable)");
+            System.out.println("4. Сортувати та вивести асортимент (Comparator)");
             System.out.println("5. Завершити роботу");
             System.out.print("Вибір: ");
 
@@ -32,19 +32,78 @@ public class Main {
                 case "1": handleSearch(scanner, store); break;
                 case "2": handleCreation(scanner, store); break;
                 case "3": printList(store.getInventory()); break;
-                case "4": 
-                    ArrayList<StoreItem> sorted = new ArrayList<>(store.getInventory());
-                    Collections.sort(sorted);
-                    System.out.println("\n--- ВІДСОРТОВАНО (Бренд -> Ціна) ---");
-                    printList(sorted);
-                    break;
+                case "4": handleSortMenu(scanner, store); break; // Новий метод підменю
                 case "5":
                     saveToFile(FILE_NAME, store);
-                    System.out.println("Вихід...");
+                    System.out.println("Дані збережено. Вихід...");
                     return;
                 default: System.out.println("Некоректний ввід.");
             }
         }
+    }
+
+    /**
+     * ПРАКТИЧНА №14: Підменю сортування з використанням анонімних класів.
+     */
+    private static void handleSortMenu(Scanner scanner, Store store) {
+        if (store.getInventory().isEmpty()) {
+            System.out.println("Список порожній, нічого сортувати.");
+            return;
+        }
+
+        System.out.println("\n--- ОБЕРІТЬ КРИТЕРІЙ СОРТУВАННЯ ---");
+        System.out.println("1. Сортувати за ЦІНОЮ (від найдешевшого)");
+        System.out.println("2. Сортувати за КІЛЬКІСТЮ (від найбільшої)");
+        System.out.println("3. Сортувати за НАЗВОЮ МОДЕЛІ (алфавіт)");
+        System.out.println("0. Повернутися в головне меню");
+        System.out.print("Вибір: ");
+
+        String sortChoice = scanner.nextLine();
+        ArrayList<StoreItem> sortedList = new ArrayList<>(store.getInventory());
+
+        switch (sortChoice) {
+            case "1":
+                // Анонімний клас для сортування за ціною
+                Collections.sort(sortedList, new Comparator<StoreItem>() {
+                    @Override
+                    public int compare(StoreItem o1, StoreItem o2) {
+                        return Double.compare(o1.getClothes().getPrice(), o2.getClothes().getPrice());
+                    }
+                });
+                System.out.println("\nРезультат: Сортування за ціною виконано.");
+                break;
+
+            case "2":
+                // Анонімний клас для сортування за кількістю (Descending)
+                Collections.sort(sortedList, new Comparator<StoreItem>() {
+                    @Override
+                    public int compare(StoreItem o1, StoreItem o2) {
+                        // o2 порівнюємо з o1 для сортування від більшого до меншого
+                        return Integer.compare(o2.getQuantity(), o1.getQuantity());
+                    }
+                });
+                System.out.println("\nРезультат: Сортування за кількістю виконано.");
+                break;
+
+            case "3":
+                // Анонімний клас для сортування за назвою моделі (Type)
+                Collections.sort(sortedList, new Comparator<StoreItem>() {
+                    @Override
+                    public int compare(StoreItem o1, StoreItem o2) {
+                        return o1.getClothes().getType().compareToIgnoreCase(o2.getClothes().getType());
+                    }
+                });
+                System.out.println("\nРезультат: Сортування за назвою моделі виконано.");
+                break;
+
+            case "0":
+                return;
+            default:
+                System.out.println("Некоректний вибір.");
+                return;
+        }
+
+        printList(sortedList);
     }
 
     private static void handleCreation(Scanner scanner, Store store) {
@@ -53,7 +112,7 @@ public class Main {
         if (c.equals("5")) return;
 
         try {
-            System.out.print("Назва моделі: "); String type = scanner.nextLine();
+            System.out.print("Назва моделі (тип): "); String type = scanner.nextLine();
             System.out.print("Бренд: "); String brand = scanner.nextLine();
             System.out.print("Розмір (XS-XXL): "); Size sz = Size.valueOf(scanner.nextLine().toUpperCase());
             System.out.print("Ціна: "); double pr = Double.parseDouble(scanner.nextLine());
@@ -66,7 +125,7 @@ public class Main {
                 case "3": System.out.print("Водостійкість (true/false): "); cl = new Outerwear(type, brand, sz, pr, scanner.nextBoolean()); break;
                 case "4": System.out.print("Вечірня (true/false): "); cl = new Dress(type, brand, sz, pr, scanner.nextBoolean()); break;
             }
-            if (scanner.hasNextLine() && !c.equals("5")) scanner.nextLine();
+            if (scanner.hasNextLine()) scanner.nextLine();
             if (cl != null) store.addNewClothes(cl, q);
         } catch (Exception e) { System.out.println("Помилка: " + e.getMessage()); }
     }
@@ -77,7 +136,7 @@ public class Main {
         if (s.equals("1")) {
             System.out.print("Розмір: ");
             printList(store.searchBySize(Size.valueOf(scanner.nextLine().toUpperCase())));
-        } else {
+        } else if (s.equals("2")) {
             System.out.print("Бренд: ");
             printList(store.searchByBrand(scanner.nextLine()));
         }
@@ -89,41 +148,26 @@ public class Main {
     }
 
     private static void loadFromFile(String f, Store s) {
-    File file = new File(f);
-    if (!file.exists()) {
-        System.out.println("[DEBUG] Файл " + f + " не знайдено за шляхом: " + file.getAbsolutePath());
-        return;
-    }
-    try (Scanner fs = new Scanner(file, "UTF-8")) {
-        int count = 0;
-        while (fs.hasNextLine()) {
-            String line = fs.nextLine();
-            if (line.trim().isEmpty()) continue;
-            String[] p = line.split(";");
-            try {
+        File file = new File(f);
+        if (!file.exists()) return;
+        try (Scanner fs = new Scanner(file, "UTF-8")) {
+            while (fs.hasNextLine()) {
+                String line = fs.nextLine();
+                if (line.trim().isEmpty()) continue;
+                String[] p = line.split(";");
                 Clothes cl = null;
-                Size sz = Size.valueOf(p[3].toUpperCase());
+                Size sz = Size.valueOf(p[3]);
                 double pr = Double.parseDouble(p[4]);
-                int q = Integer.parseInt(p[p.length - 1]); // Останнє число - кількість
-
+                int q = Integer.parseInt(p[p.length-1]);
                 if (p[0].equals("Pants")) cl = new Pants(p[1], p[2], sz, pr, Boolean.parseBoolean(p[5]));
                 else if (p[0].equals("Shirts")) cl = new Shirts(p[1], p[2], sz, pr, Boolean.parseBoolean(p[5]));
                 else if (p[0].equals("Outerwear")) cl = new Outerwear(p[1], p[2], sz, pr, Boolean.parseBoolean(p[5]));
                 else if (p[0].equals("Dress")) cl = new Dress(p[1], p[2], sz, pr, Boolean.parseBoolean(p[5]));
-                
-                if (cl != null) {
-                    s.addNewClothes(cl, q);
-                    count++;
-                }
-            } catch (Exception e) {
-                System.out.println("[DEBUG] Помилка в рядку: " + line + " -> " + e.getMessage());
+                if (cl != null) s.addNewClothes(cl, q);
             }
-        }
-        System.out.println("[DEBUG] Завантажено об'єктів: " + count);
-    } catch (Exception e) {
-        System.out.println("[DEBUG] Критична помилка читання: " + e.getMessage());
+        } catch (Exception e) {}
     }
-}
+
     private static void saveToFile(String f, Store s) {
         try (PrintWriter w = new PrintWriter(new File(f), "UTF-8")) {
             for (StoreItem i : s.getInventory()) w.println(i.getClothes().toDataString() + ";" + i.getQuantity());
